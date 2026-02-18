@@ -30,8 +30,8 @@ YouTube suele bloquear los scripts automáticos. Para evitarlo:
 ## 📦 Instalación y Puesta en Marcha
 1. Clona el repositorio:
 ```shell
-git clone [https://github.com/tu-usuario/TelgramBot_downloadMP3.git](https://github.com/tu-usuario/TelgramBot_downloadMP3.git)
-cd TelgramBot_downloadMP3
+git clone [https://github.com/tu-usuario/TelgramBot.git](https://github.com/tu-usuario/TelgramBot.git)
+cd TelgramBot
 ```
 2. Configura el entorno virtual e instala dependencias:
 ```shell
