@@ -1,0 +1,175 @@
+import os
+import subprocess
+import glob
+import shlex
+from turtle import update
+import signal
+import sys
+from colorama import init, Fore, Style
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
+
+current_process = None
+
+init(autoreset=True)
+
+TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+if not TOKEN:
+    raise ValueError("Token not found in environment variables")
+
+DOWNLOAD_DIR = "downloads"
+
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+async def start(update, context):
+    teclado = [['📋 Pegar Enlace']]
+    markup = ReplyKeyboardMarkup(teclado, resize_keyboard=True)
+    
+    await update.message.reply_text(
+        "Hola! Pulsa el botón o pega tu enlace directamente:",
+        reply_markup=markup
+    )
+
+async def descargar_y_enviar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    url = update.message.text.strip()
+
+    # detect supported links
+    if "youtube.com" in url or "youtu.be" in url or "spotify.com" in url:
+        metodo = "media"
+    else:
+        await update.message.reply_text("Link not recognized.")
+        return
+
+    msg = await update.message.reply_text("Whait wile downloading...")
+
+    try:
+        comando = [
+            "python", "-m", "yt_dlp",
+            "--cookies", "cookies.txt",
+            "--default-search", "ytsearch1",
+            "-f", "bestaudio",
+            "-x",
+            "--audio-format", "mp3",
+            "--audio-quality", "192K",
+            "--restrict-filenames",
+            "--add-metadata",
+            "--embed-thumbnail",
+            "--parse-metadata", "uploader:%(artist)s",
+
+            # clean titles
+            "--replace-in-metadata", "title", "(?i)\\(official video\\)", "",
+            "--replace-in-metadata", "title", "(?i)\\(lyrics?\\)", "",
+            "--replace-in-metadata", "title", "(?i)\\[4k\\]", "",
+            "--replace-in-metadata", "title", "(?i)video oficial", "",
+
+            "-o", f"{DOWNLOAD_DIR}/%(playlist_index)s - %(title)s.%(ext)s",
+            url
+        ]
+
+        # run yt-dlp command
+        global current_process
+        # start process
+        current_process = subprocess.Popen(
+            comando,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8"
+        )
+
+        # wait and capture output
+        stdout, stderr = current_process.communicate()
+
+        # check exit status
+        if current_process.returncode != 0:
+            print(stderr)
+            await update.message.reply_text("Download error.")
+            current_process = None
+            return
+
+        # reset process AFTER checking
+        current_process = None
+
+        # find mp3 files
+        archivos = glob.glob(f"{DOWNLOAD_DIR}/*.mp3")
+
+        if archivos:
+            for archivo in sorted(archivos, key=os.path.getctime):
+                with open(archivo, "rb") as audio_file:
+                    await update.message.reply_audio(audio=audio_file)
+
+            # Uncomment to delete files after sending and avoid filling up storage
+            # for f in archivos:
+            #     os.remove(f)
+
+            await msg.delete()
+        else:
+            await update.message.reply_text("MP3 not found.")
+
+    except Exception as e:
+        await update.message.reply_text(f"Internal error: {str(e)}")
+
+
+async def descargar_archivo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    file = None
+    filename = "audio_recibido.mp3"
+
+    # detect audio normal
+    if update.message.audio:
+        file = await update.message.audio.get_file()
+        filename = update.message.audio.file_name or filename
+
+    # detect document tipo mp3
+    elif update.message.document:
+        if update.message.document.mime_type.startswith("audio"):
+            file = await update.message.document.get_file()
+            filename = update.message.document.file_name or filename
+
+    # detect voice notes (ogg)
+    elif update.message.voice:
+        file = await update.message.voice.get_file()
+        filename = update.message.voice.file_name or "nota_voz.ogg"
+
+    if file:
+        path = os.path.join(DOWNLOAD_DIR, filename)
+        await file.download_to_drive(path)
+        await update.message.reply_text(f"File downloaded: {filename}")
+    else:
+        await update.message.reply_text("Not a valid audio file.")
+
+async def stop_download(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_process
+    if current_process:
+        current_process.terminate()
+        await update.message.reply_text("Download canceled.")
+        current_process = None
+    else:
+        await update.message.reply_text("No download in progress.")
+
+def handle_sigint(sig, frame):
+    print("\n" + "\n" + "\n" + "\n" + Fore.MAGENTA + "(⸝⸝> ᴗ•⸝⸝)" + "\n")
+    sys.exit(0)
+
+if __name__ == '__main__':
+    # print("--- Bot encendido ---")
+    print("\n" + Fore.CYAN + " ∧,,,,,,∧  " + Fore.YELLOW + " ~ ┏━━━━━━━━━┓")
+    print(Fore.CYAN + "(  ̳• · • ̳) " + Fore.YELLOW + "    AlfredBot ")
+    print(Fore.CYAN + "/        づ" + Fore.YELLOW + " ~ ┗━━━━━━━━━┛")
+
+    app = ApplicationBuilder().token(TOKEN).build()
+
+    # handle links
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, descargar_y_enviar))
+
+    # handle audio files sent to bot
+    app.add_handler(MessageHandler(
+        filters.AUDIO | filters.Document.ALL | filters.VOICE,
+        descargar_archivo
+    ))
+
+    app.add_handler(CommandHandler("stop", stop_download))
+
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    app.run_polling()

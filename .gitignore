@@ -1,0 +1,7 @@
+ffmpeg.exe
+ffprobe.exe
+venv/
+*.mp3
+downloads/
+cookies.txt
+.env
