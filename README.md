@@ -1,6 +1,3 @@
-# Downloader-mp3-telegram-bot
-A telegram bot that transforms youtube and spotify links into mp3
-
 # 🎵 AlfredBot - Telegram MP3 Downloader
 
 AlfredBot es un bot de Telegram diseñado para descargar audio de YouTube y Spotify directamente en formato MP3 con metadatos (título, artista y miniatura) incluidos.
