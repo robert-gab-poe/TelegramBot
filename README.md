@@ -56,19 +56,3 @@ python bot.py
 Los archivos ffmpeg.exe y ffprobe.exe han sido añadidos al .gitignore debido a su tamaño superior a 100MB. Es obligatorio descargarlos manualmente para que el bot pueda realizar la conversión de audio correctamente.
 
 ---
-
-### ¿Cómo completar el repositorio?
-
-Para que sea un repo de 10, te sugiero hacer esto:
-
-1.  **Crea un archivo `requirements.txt`**: Como ya tienes el entorno virtual (`venv`) activo y las librerías instaladas, ejecuta este comando en tu terminal:
-    ```powershell
-    pip freeze > requirements.txt
-    ```
-    Esto creará una lista de todas las librerías (python-telegram-bot, yt-dlp, spotdl, etc.) para que cualquiera pueda instalarlas de un golpe.
-2.  **Sube los cambios**:
-    ```powershell
-    git add README.md requirements.txt
-    git commit -m "Add documentation and requirements"
-    git push
-    ```
