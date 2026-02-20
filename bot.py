@@ -76,12 +76,27 @@ async def descargar_y_enviar(update: Update, context: ContextTypes.DEFAULT_TYPE)
             "--cookies", COOKIES_PATH,
             "--js-runtimes", "node",
             "--extractor-args", "youtube:player-client=web,web_safari",
+
             "-f", "bestaudio/best",
             "-x",
             "--audio-format", "mp3",
             "--audio-quality", "192K",
-            "--restrict-filenames",
+
+            "--write-thumbnail",
+            "--convert-thumbnails", "jpg",
+            "--add-metadata",
+            "--embed-thumbnail",
+            "--embed-metadata",
+
+            # Limpiar título
+            "--replace-in-metadata", "title", "(?i)\\(official video\\)", "",
+            "--replace-in-metadata", "title", "(?i)\\(lyrics?\\)", "",
+            "--replace-in-metadata", "title", "(?i)\\[4k\\]", "",
+            "--replace-in-metadata", "title", "(?i)video oficial", "",
+
+            # Output: mismo "basename" para mp3 y jpg
             "-o", os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s"),
+
             url
         ]
 
@@ -100,10 +115,34 @@ async def descargar_y_enviar(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await msg.delete()
             return
 
-        # envía el último mp3 creado
         archivo = max(archivos, key=os.path.getctime)
+        base = os.path.splitext(archivo)[0]
+
+        # Busca thumbnail (preferimos jpg)
+        thumb = None
+        for ext in ("jpg", "jpeg", "png", "webp"):
+            cand = f"{base}.{ext}"
+            if os.path.exists(cand):
+                thumb = cand
+                break
+
+        titulo = os.path.splitext(os.path.basename(archivo))[0]
+
         with open(archivo, "rb") as audio_file:
-            await update.message.reply_audio(audio=audio_file)
+            if thumb:
+                with open(thumb, "rb") as thumb_file:
+                    await update.message.reply_audio(
+                        audio=audio_file,
+                        title=titulo,
+                        filename=f"{titulo}.mp3",
+                        thumbnail=thumb_file,   # ✅ ESTO fuerza la imagen en Telegram (si el cliente lo soporta)
+                    )
+            else:
+                await update.message.reply_audio(
+                    audio=audio_file,
+                    title=titulo,
+                    filename=f"{titulo}.mp3",
+                )
 
         # limpia
         for f in archivos:
