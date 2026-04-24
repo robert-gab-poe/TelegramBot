@@ -1,55 +1,191 @@
-# 🎵 AlfredBot - Telegram MP3 Downloader
+# 🎵 Telegram Audio Downloader Bot
 
-AlfredBot es un bot de Telegram diseñado para descargar audio de YouTube y Spotify directamente en formato MP3 con metadatos (título, artista y miniatura) incluidos.
+This project is a Telegram bot that allows users to download audio from supported links (such as YouTube or Spotify) and receive it as an MP3 file directly in Telegram.
 
-## 🚀 Requisitos Previos
+It also supports downloading audio files sent by users and saving them locally.
 
-Antes de ejecutar el bot, necesitas instalar y configurar las siguientes herramientas:
+---
 
-### 1. Herramientas del Sistema
-El bot utiliza motores externos para el procesamiento de audio. Debes descargar estos archivos y pegarlos en la **carpeta raíz** del proyecto:
+## 🚀 Features
 
-* **FFmpeg & FFprobe**: Descarga los ejecutables de [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) (busca el `ffmpeg-git-full.7z` o la versión Essentials). 
-    * *Instrucción*: Extrae el contenido y copia los archivos `ffmpeg.exe` y `ffprobe.exe` de la carpeta `bin` a la raíz de este proyecto.
-* **Node.js**: Necesario para resolver las firmas de YouTube. Descárgalo e instálalo desde [nodejs.org](https://nodejs.org/).
+* 🎧 Download audio from:
 
-### 2. Configuración de la API de Telegram
-Para que el bot funcione, necesitas un Token de acceso:
-1. Habla con [@BotFather](https://t.me/botfather) en Telegram.
-2. Crea un nuevo bot con `/newbot` y guarda el **API Token**.
-3. (Recomendado) Crea un archivo `.env` en la raíz del proyecto y añade:
-   ```env
-   TELEGRAM_TOKEN=tu_token_aqui
+  * YouTube links
+  * Spotify links (searched via YouTube)
+* 🔊 Convert audio to MP3 (192 kbps)
+* 🖼 Embed thumbnail and metadata
+* 🧹 Clean titles automatically
+* 📤 Send audio back to the user
+* 📥 Download and store audio files sent to the bot
+* ⛔ Cancel downloads with `/stop`
 
-### 3. Cookies de YouTube (Evitar Bloqueos)
-YouTube suele bloquear los scripts automáticos. Para evitarlo:
-1. Instala la extensión "Get cookies.txt LOCALLY" en tu navegador (Brave, Chrome o Edge).
-2. Entra en YouTube, asegúrate de tener la sesión iniciada y exporta las cookies.
-3. Guarda el archivo como cookies.txt en la carpeta principal del bot.
+---
 
-## 📦 Instalación y Puesta en Marcha
-1. Clona el repositorio:
-```shell
-git clone [https://github.com/tu-usuario/TelgramBot.git](https://github.com/tu-usuario/TelgramBot.git)
-cd TelgramBot
+## 📁 Project Structure
+
 ```
-2. Configura el entorno virtual e instala dependencias:
-```shell
-python -m venv venv
-.\venv\Scripts\activate
-pip install -r requirements.txt
+.
+├── downloads/        # Downloaded audio files
+├── venv/             # Virtual environment
+└── bot.py            # Main bot script
 ```
-3. Ejecutar el bot
-```shell
+
+---
+
+## ⚙️ Requirements
+
+Make sure you have:
+
+* Python 3.10+
+* pip
+* Telegram account
+
+### 📦 Python dependencies
+
+Install required libraries:
+
+```bash
+pip install python-telegram-bot yt-dlp colorama
+```
+
+---
+
+## 🤖 Create Your Telegram Bot
+
+1. Open Telegram and search for **BotFather**
+2. Run:
+
+   ```
+   /start
+   ```
+3. Create a new bot:
+
+   ```
+   /newbot
+   ```
+4. Choose:
+
+   * Bot name
+   * Username (must end in `bot`)
+5. Copy the **token** provided
+
+---
+
+## 🔑 Set Environment Variable
+
+You must store your bot token as an environment variable.
+
+### Windows (CMD):
+
+```bash
+set TELEGRAM_TOKEN=your_token_here
+```
+
+### Windows (PowerShell):
+
+```powershell
+$env:TELEGRAM_TOKEN="your_token_here"
+```
+
+---
+
+## 🍪 Export YouTube Cookies
+
+This is required for some videos (age-restricted, private, etc.)
+
+### Steps:
+
+1. Install a browser extension:
+
+   * "Get cookies.txt" (Chrome/Firefox)
+
+2. Go to:
+   https://www.youtube.com/
+
+3. Make sure you are logged in
+
+4. Export cookies as `cookies.txt`
+
+5. Place the file in the project root:
+
+```
+.
+├── bot.py
+├── cookies.txt   ✅
+```
+
+---
+
+## ▶️ Run the Bot
+
+Activate your virtual environment:
+
+```bash
+venv\Scripts\activate
+```
+
+Run the bot:
+
+```bash
 python bot.py
 ```
 
-## 🛠️ Uso
-- Envía el comando /start para recibir el saludo de bienvenida.
-- El bot activará un botón de "Pegar enlace" que facilitará la interacción con tu portapapeles.
-- Pega un enlace de YouTube o Spotify y el bot te devolverá el archivo MP3 procesado.
+---
 
-## ⚠️ Advertencia de Archivos Grandes
-Los archivos ffmpeg.exe y ffprobe.exe han sido añadidos al .gitignore debido a su tamaño superior a 100MB. Es obligatorio descargarlos manualmente para que el bot pueda realizar la conversión de audio correctamente.
+## 💬 How to Use the Bot
+
+1. Open your bot in Telegram
+2. Press **Start**
+3. Send:
+
+   * A YouTube or Spotify link
+4. Wait for download
+5. Receive the MP3 file 🎵
 
 ---
+
+## 📥 Sending Audio to the Bot
+
+You can also send:
+
+* Audio files
+* Voice notes
+* MP3 documents
+
+The bot will download and store them in `/downloads`.
+
+---
+
+## ⛔ Cancel a Download
+
+Use the command:
+
+```
+/stop
+```
+
+This will terminate the current download process.
+
+---
+
+## ⚠️ Important Notes
+
+* Only one instance of the bot can run at a time
+* Downloads are stored locally (can fill disk if not cleaned)
+* Spotify links are searched on YouTube (not direct download)
+
+---
+
+## 🛠️ Possible Improvements
+
+* Auto-delete files after sending
+* Multi-user download queue
+* Progress feedback
+* Docker support
+* Database integration
+
+---
+
+## 📄 License
+
+This project is for educational purposes.
