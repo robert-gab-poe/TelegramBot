@@ -40,13 +40,90 @@ Make sure you have:
 * pip
 * Telegram account
 
-### 📦 Python dependencies
+---
+
+## 📦 Python dependencies
 
 Install required libraries:
 
 ```bash
 pip install python-telegram-bot yt-dlp colorama
 ```
+
+---
+
+## 🎬 Install FFmpeg (REQUIRED)
+
+This bot requires **ffmpeg** and **ffprobe** to convert audio into MP3.
+
+### ✅ Option 1 — Install via command (recommended)
+
+If you have a package manager:
+
+**Windows (winget):**
+
+```bash
+winget install ffmpeg
+```
+
+**Or using Chocolatey:**
+
+```bash
+choco install ffmpeg
+```
+
+---
+
+### ⚠️ Option 2 — Manual installation
+
+If the command method does not work:
+
+1. Download FFmpeg from:
+   https://www.gyan.dev/ffmpeg/builds/
+
+2. Download the **Essentials build**
+
+3. Extract the zip file
+
+4. Go to the `/bin` folder and locate:
+
+```
+ffmpeg.exe
+ffprobe.exe
+```
+
+5. You have two options:
+
+#### Option A — Add to PATH (recommended)
+
+Add this folder to your system PATH:
+
+```
+C:\path\to\ffmpeg\bin
+```
+
+#### Option B — Place inside the project
+
+Copy these files into your project directory:
+
+```
+/bin/ffmpeg.exe
+/bin/ffprobe.exe
+```
+
+And make sure your script can access them.
+
+---
+
+### 🔍 Verify installation
+
+Run:
+
+```bash
+ffmpeg -version
+```
+
+If you see version info → everything is working ✅
 
 ---
 
@@ -173,6 +250,7 @@ This will terminate the current download process.
 * Only one instance of the bot can run at a time
 * Downloads are stored locally (can fill disk if not cleaned)
 * Spotify links are searched on YouTube (not direct download)
+* FFmpeg is required for audio conversion
 
 ---
 
